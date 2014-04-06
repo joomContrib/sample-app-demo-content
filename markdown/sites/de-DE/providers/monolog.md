@@ -130,10 +130,13 @@ define('JDEBUG', $config->get('system.debug', false));
 $container->registerServiceProvider(new MonologServiceProvider);
 
 // Set the logger to the application.
+$logger = $container->get('logger');
 $this->setLogger($logger);
 		
 // Set the container to the application.
 $this->setContainer($container);
+
+$logger->debug('Application initialise complete.');
 ```
 
 
