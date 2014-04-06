@@ -13,7 +13,7 @@
 **Requires**
 
  - ["monolog/monolog": "1.8.*@stable"] [monolog]
- - ["joomla/registry": "1.1.@stable"] [j-registry]
+ - ["joomla/registry": "1.1.*@stable"] [j-registry]
    - Container `config` must be set.
  - ["swiftmailer/swiftmailer": "5.1.*@stable"] [swift-mailer]
    - Only if `handler_mail = true`
@@ -98,6 +98,44 @@ if ($this instanceof LoggerAwareInterface)
 // Log a msg.
 $this->getLogger()->log('info', 'This is a info msg!', array('detail' => $detail));
 ```
+
+
+## <span class="text-info" data-icon="&#xe15e;" aria-hidden="true"></span> Application Example {.page-header .text-success}
+
+```php
+??? ,initialise(),&#xe15e;,warning
+// Create the container.
+$container = new Container;
+
+// Get Config - Share Config.
+$config    = new Registry;
+$conf_file = JPATH_ETC .'/jconfig.json';
+		
+if (!is_file($conf_file))
+{
+    throw new \RuntimeException('Could not load application configuration file.', 500);
+}
+		
+$config->loadFile($conf_file);
+		
+$container->share('config', function (Container $c) use ($config) {
+    return $config;
+}, true);
+		
+// Set debug.
+// If true the logger overrides the trigger level for `default_level` to debug.
+define('JDEBUG', $config->get('system.debug', false));
+
+// Register the logger.
+$container->registerServiceProvider(new MonologServiceProvider);
+
+// Set the logger to the application.
+$this->setLogger($logger);
+		
+// Set the container to the application.
+$this->setContainer($container);
+```
+
 
 
 [monolog]: https://packagist.org/packages/monolog/monolog "Sends your logs to files, sockets, inboxes, databases and various web services"
