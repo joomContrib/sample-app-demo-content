@@ -2,9 +2,7 @@
 
 %%%ArticleOptions%%%
 
-<div class="alert alert-info">
-<p>This site requires translation.</p>
-</div>
+%%%TranslationNone%%%
 
 > Service Provider for log messages, configurable through the application config.
 
@@ -31,7 +29,7 @@
 </div>
 
 
-## <span class="text-info" data-icon="&#xe08f;" aria-hidden="true"></span> Config Options {.page-header .text-success}
+## <span data-icon="&#xe08f;" aria-hidden="true"></span> Config Options {.page-header .text-muted}
 
 ```ini
 ??? ,available options,&#xe08f;,code
@@ -79,7 +77,9 @@
 ```
 
 
-## <span class="text-info" data-icon="&#xe15b;" aria-hidden="true"></span> Usage {.page-header .text-success}
+## <span data-icon="&#xe15b;" aria-hidden="true"></span> Usage {.page-header .text-success}
+
+> Basic usage description for the logger.
 
 ```php
 ??? ,usage,&#xe15b;,success
@@ -96,48 +96,70 @@ if ($this instanceof LoggerAwareInterface)
 }
 
 // Log a msg.
-$this->getLogger()->log('info', 'This is a info msg!', array('detail' => $detail));
+$this->getLogger()->log('info', 'This is an info msg!', array('detail' => $detail));
 ```
 
 
-## <span class="text-info" data-icon="&#xe15e;" aria-hidden="true"></span> Application Example {.page-header .text-success}
+## <span data-icon="&#xe15e;" aria-hidden="true"></span> Application Example {.page-header .text-warning}
+
+%%%CodeUsageWarning%%%
+
+Example for your application initialise method, including:
+
+ - Create Container
+ - Create/Share Config and define debug
+ - Registering the Logger
+ - Set Logger and Container
+ - Write a log message
+
+The method assumes that your application class implements `LoggerAwareInterface`
+and `ContainerAwareInterface` and does set both instances 
+without an instanceof check like in the usage example above.
 
 ```php
-??? ,initialise(),&#xe15e;,warning
-// Create the container.
-$container = new Container;
-
-// Get Config - Share Config.
-$config    = new Registry;
-$conf_file = JPATH_ETC .'/jconfig.json';
-		
-if (!is_file($conf_file))
+??? ,Application initialise method,&#xe15e;,warning
+protected function initialise()
 {
-    throw new \RuntimeException('Could not load application configuration file.', 500);
+    // Create the container.
+    $container = new Container;
+
+    // Get Config - Share Config.
+    $config    = new Registry;
+    $conf_file = JPATH_ETC .'/jconfig.json';
+		
+    if (!is_file($conf_file))
+    {
+        throw new \RuntimeException('Could not load application configuration file.', 500);
+    }
+		
+    $config->loadFile($conf_file);
+		
+    $container->share('config', function (Container $c) use ($config) {
+        return $config;
+    }, true);
+		
+    // Set debug.
+    // If true the logger overrides the trigger level for `default_level` to debug.
+    define('JDEBUG', $config->get('system.debug', false));
+
+    // Register the logger.
+    $container->registerServiceProvider(new MonologServiceProvider);
+
+    // Set the logger to the application.
+    $logger = $container->get('logger');
+    $this->setLogger($logger);
+		
+    // Set the container to the application.
+    $this->setContainer($container);
+
+    $logger->debug('Application initialise complete.');
 }
-		
-$config->loadFile($conf_file);
-		
-$container->share('config', function (Container $c) use ($config) {
-    return $config;
-}, true);
-		
-// Set debug.
-// If true the logger overrides the trigger level for `default_level` to debug.
-define('JDEBUG', $config->get('system.debug', false));
-
-// Register the logger.
-$container->registerServiceProvider(new MonologServiceProvider);
-
-// Set the logger to the application.
-$logger = $container->get('logger');
-$this->setLogger($logger);
-		
-// Set the container to the application.
-$this->setContainer($container);
-
-$logger->debug('Application initialise complete.');
 ```
+
+
+## <span data-icon="&#xe06f;" aria-hidden="true"></span> Comments {.page-header .text-primary}
+
+%%%DisqusComments%%%
 
 
 
