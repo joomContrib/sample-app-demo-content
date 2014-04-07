@@ -2,8 +2,6 @@
 
 %%%ArticleOptions%%%
 
-%%%TranslationNone%%%
-
 > Service Provider for a database connection.
 
 <div id="requires" class="row">
